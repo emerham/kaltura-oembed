@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>oEmbed Example</title>
+  <style>
+    iframe.oembed-content {
+      aspect-ratio: 16/9;
+      border: 0;
+      display: block;
+      height: auto;
+      margin-inline: auto;
+      max-width: 100%;
+    }
+    section {
+      background-color: aliceblue;
+      height: 100vh;
+      min-height: 800px;
+    }
+  </style>
+
+</head>
+<body>
+<main>
+  <h1>Embedded Video from Oregon State</h1>
+  <section>
+    <h2>Default Kaltura Video</h2>
+    <div id="video-container">
+      <iframe allow="fullscreen" class="oembed-content" height="720" id="video-iframe" loading="lazy"
+              width="1280"></iframe>
+    </div>
+  </section>
+  <section>
+    <h2>Updated with styles</h2>
+    <div id="video-container-update">
+      <iframe allow="fullscreen" class="oembed-content" height="720" id="video-update-iframe" loading="lazy"
+              width="1280"></iframe>
+    </div>
+  </section>
+</main>
+<script>
+  async function fetchEmbed(url) {
+    const response = await fetch(`proxy.php?url=${encodeURIComponent(url)}`);
+    const data = await response.json();
+    return data.html;
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const iframes = document.querySelectorAll('.oembed-content');
+    const oembedUrl = 'https://media.oregonstate.edu/oembed?url=https://media.oregonstate.edu/id/1_65x23n7m?width=1280%26height=720%26playerId=44855082';
+
+    try {
+      const html = await fetchEmbed(oembedUrl);
+      // Create a Blob object to contain the HTML
+      const blob = new Blob([html], { type: 'text/html' });
+      // Set iframe src to the Blob URL
+      iframes.forEach(iframe => {
+        iframe.src = URL.createObjectURL(blob);
+      });
+    } catch (error) {
+      console.error('Error fetching oEmbed content:', error);
+    }
+  });
+  const updatedIframeContent = document.querySelector('iframe#video-update-iframe');
+
+  updatedIframeContent.addEventListener('load', () => {
+    const iframeDocument = updatedIframeContent.contentDocument || updatedIframeContent.contentWindow.document;
+    const kPlayer = iframeDocument.querySelector('div#kplayer.playerv3');
+    if (kPlayer) {
+      kPlayer.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; margin: 0;';
+    }
+  });
+
+</script>
+</body>
+</html>
